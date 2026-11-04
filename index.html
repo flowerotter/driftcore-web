@@ -110,8 +110,31 @@ body {
 		</div>
 
 		<script src="index.js"></script>
+<script>
+(function () {
+	const PARTS = ["index.pck.0","index.pck.1"];
+	const TOTAL = 108903056;
+	const plainFetch = window.fetch.bind(window);
+	window.fetch = async function (input, init) {
+		const url = typeof input === "string" ? input : input.url;
+		if (!/(^|\/)index\.pck(\?|$)/.test(url)) {
+			return plainFetch(input, init);
+		}
+		const base = url.replace(/index\.pck(\?.*)?$/, "");
+		const blobs = [];
+		for (const part of PARTS) {
+			const res = await plainFetch(base + part, init);
+			if (!res.ok) {
+				return res;
+			}
+			blobs.push(await res.blob());
+		}
+		return new Response(new Blob(blobs), {status: 200, headers: {"Content-Length": String(TOTAL)}});
+	};
+})();
+</script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":78675596,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":108903056,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
